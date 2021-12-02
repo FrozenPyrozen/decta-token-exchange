@@ -119,4 +119,57 @@ contract('Token', ([deployer, receiver, exchange]) => {
       });
     });
   });
+
+  describe('delegated token transfers', () => {
+    let amount;
+    let result;
+
+    beforeEach(async () => {
+      amount = tokens(100);
+      await token.approve(exchange, amount, { from: deployer });
+    });
+
+    describe('success', () => {
+      beforeEach(async () => {
+        result = await token.transferFrom(deployer, receiver, amount, { from: exchange });
+      });
+
+      it('transfers token balances from deployer to receiver', async () => {
+        let balanceOf;
+        balanceOf = await token.balanceOf(deployer);
+        balanceOf.toString().should.equal(tokens(999900).toString());
+
+        balanceOf = await token.balanceOf(receiver);
+        balanceOf.toString().should.equal(tokens(100).toString());
+      });
+
+      it('reset the allowance after transferFrom', async () => {
+        const allowance = await token.allowance(deployer, exchange);
+        allowance.toString().should.equal('0');
+      });
+
+      it('emits a Transfer event', async () => {
+        const log = result.logs[0];
+        log.event.should.equal('Transfer');
+
+        const event = log.args;
+        event.from.toString().should.equal(deployer, 'from is correct');
+        event.to.toString().should.equal(receiver, 'to is correct');
+        event.value.toString().should.equal(amount.toString(), 'value is correct');
+      });
+    });
+
+    describe('failure', async () => {
+      it('rejects transfer too many tokens, more than approved', async () => {
+        let invalidAmount;
+
+        invalidAmount = tokens(10000000000000000000); // greater than total supply and approved
+        await token.transferFrom(deployer, receiver, invalidAmount, { from: deployer }).should.be.rejectedWith(EVM_REVERT);
+      });
+
+      it('rejects invalid recipients', async () => {
+        await token.transferFrom(deployer, 0x0, amount, { from: deployer }).should.be.rejectedWith(EVM_INVALID_ADDRESS);
+      });
+    });
+  });
 });
