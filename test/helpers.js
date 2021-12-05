@@ -1,4 +1,8 @@
-export const tokens = (quantity) => new web3.utils.BN(web3.utils.toWei(quantity.toString(), 'ether'));
+export const ether = (quantity) => new web3.utils.BN(web3.utils.toWei(quantity.toString(), 'ether'));
+// Same as ether
+export const tokens = (quantity) => ether(quantity);
+
+export const ETHER_ADDRESS = '0x0000000000000000000000000000000000000000';
 export const EVM_REVERT = 'VM Exception while processing transaction: revert';
 export const EVM_INVALID_ADDRESS = 'invalid address (argument="address", value=0, code=INVALID_ARGUMENT, version=address/5.0.5) (argument="_to", value=0, code=INVALID_ARGUMENT, version=abi/5.0.7)';
 

@@ -96,7 +96,7 @@ contract('Token', ([deployer, receiver, exchange]) => {
         allowance.toString().should.equal(amount.toString());
       });
 
-      it('emits a Approval event', async () => {
+      it('emits a Approval event', () => {
         const log = result.logs[0];
         log.event.should.equal('Approval');
 
